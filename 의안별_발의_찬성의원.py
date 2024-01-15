@@ -99,3 +99,55 @@ gongbal['chan_people_list'] = chan_people_list
 gongbal_df = pd.DataFrame.from_dict(gongbal)
 
 gongbal_df.to_csv('/Users/admin/Documents/마부작침/의안정보크롤링/gongbal_Oct25.csv')
+
+
+#----------------------------------------
+# 의안별 대표 발의자 뽑기 
+#----------------------------------------
+
+rep_bal = []
+
+bal = list(gongbal21_total['bal_people_list'])
+
+for each in bal:
+    repdetail = eval(each)[0]
+    name = repdetail.split('(')[0]
+    dang = repdetail.split('(')[1].split('/')[0]
+    han = repdetail.split('(')[1].split('/')[1].replace(')','')
+    
+    if (name=='김병욱') and (dang=='더불어민주당'):
+        rep_bal.append(han)
+    elif (name=='이수진') and (han=='李壽珍'):
+        rep_bal.append(han)
+    else:
+        rep_bal.append(name)
+
+#----------------------------------------
+#공동발의 명단 뽑기
+#----------------------------------------
+
+#안건 하나
+url = 'https://likms.assembly.go.kr/bill/coactorListPopup.do?billId=PRC_L2J3K0I9J0H1P1Q5O2P7N0O8M9U1V9'
+response = requests.get(url)
+html = response.text
+soup = BeautifulSoup(html,'html.parser')
+info = soup.find_all('a', {'target':'_blank'}) #만악의 근원
+
+name = []
+dang = []
+han_num = []
+unique = []
+
+for num in range(len(info)):
+    name.append(info[num].text.split('(')[0])
+    dang.append(info[num].text.split('(')[1].split('/')[0])
+    han_num.append(info[num].text.split('(')[1].split('/')[1].replace(')',''))
+    unique.append(int(re.sub(r'[^0-9]', '', info[num]['href'])))
+
+names = dict()
+names['name'] = name
+names['dang'] = dang
+names['han_num'] = han_num
+names['unique'] = unique
+
+print(names)
